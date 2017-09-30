@@ -13,42 +13,37 @@ package test_streams;
 
 import java.util.HashSet;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Grep implements Function<DataChunk, GrepChunk> {
+public class GrepMapper implements Function<DataChunk, GrepChunk> {
 
-	private final String regex;
+	private final Pattern regex;
+	
 	private final HashSet<Long> threadIds;
 
-	public Grep(String regex, HashSet<Long> threadIds) {
-		this.regex = regex;
+	public GrepMapper(String regex, HashSet<Long> threadIds) {
+		this.regex = Pattern.compile(regex);
 		this.threadIds = threadIds;
 	}
 
-	public static Grep mapper(String regex) {
-		return new Grep(regex, new HashSet<>());
+	public static GrepMapper mapper(String regex) {
+		return new GrepMapper(regex, new HashSet<>());
 	}
 
-	public static Grep mapper(String regex, HashSet<Long> threadIds) {
-		return new Grep(regex, threadIds);
+	public static GrepMapper mapper(String regex, HashSet<Long> threadIds) {
+		return new GrepMapper(regex, threadIds);
 	}
-
-//	public String grepText(String text) {
-//		CharSequence input = text;
-//		Matcher m = Pattern.compile(regex).matcher(input);
-//		while (m.find()) {
-//			m.start();
-//		}
-//	}
 
 	@Override
 	public GrepChunk apply(DataChunk arg0) {
 		synchronized (threadIds) {
 			threadIds.add(Thread.currentThread().getId());
 		}
-//		System.out.printf("[%d]grep: %d\n", Thread.currentThread().getId(), arg0.startLine);
 		GrepChunk grepChunk = new GrepChunk(arg0.startLine);
+		Matcher matcher = regex.matcher("");
 		for (String line : arg0.lines) {
-			if (line.matches(regex))
+			if (matcher.reset(line).find())
 				grepChunk.lines.add(line);
 		}
 		return grepChunk;

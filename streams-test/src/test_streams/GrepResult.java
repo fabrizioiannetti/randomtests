@@ -24,45 +24,45 @@ public class GrepResult {
 	public ArrayList<GrepChunk> chunks = new ArrayList<>();
 
 	public static void accumulate(GrepResult r, GrepChunk c) {
-//		System.out.printf("[%d]accumulate: %s <- %s\n", Thread.currentThread().getId(), r, c);
 		r.chunks.add(c);
 	}
 
 	public static GrepResult combine(GrepResult one, GrepResult other) {
-//		System.out.printf("[%d]combine:    %s <- %s\n", Thread.currentThread().getId(), one, other);
 		one.chunks.addAll(other.chunks);
 		return one;
 	}
 
 	public static Collector<GrepChunk, GrepResult, GrepResult> collector() {
 		Collector<GrepChunk, GrepResult, GrepResult> collector = new Collector<GrepChunk, GrepResult, GrepResult>() {
-
 			@Override
 			public BiConsumer<GrepResult, GrepChunk> accumulator() {
 				return GrepResult::accumulate;
 			}
-
 			@Override
 			public Set<Characteristics> characteristics() {
 				return EnumSet.noneOf(Characteristics.class);
 			}
-
 			@Override
 			public BinaryOperator<GrepResult> combiner() {
 				return GrepResult::combine;
 			}
-
 			@Override
 			public Function<GrepResult, GrepResult> finisher() {
 				return Function.identity();
 			}
-
 			@Override
 			public Supplier<GrepResult> supplier() {
 				return () -> { return new GrepResult(); };
 			}
-			
 		};
 		return collector;
+	}
+
+	public int size() {
+		int size = 0;
+		for (GrepChunk chunk : chunks) {
+			 size = size + chunk.lines.size();
+		}
+		return size;
 	}
 }

@@ -12,17 +12,18 @@
 package test_streams;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataChunk {
 	public int startLine;
+	public ArrayList<String> lines;
 
-	public DataChunk(int startLine, String[] data, int size) {
+	public DataChunk(int startLine, List<String> srcLines, int size) {
 		this.startLine = startLine;
 		lines = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
-			lines.add(data[i%data.length]);
+			lines.add(srcLines.get(i%srcLines.size()));
 		}
 	}
 
-	public ArrayList<String> lines;
 }
